@@ -29,10 +29,37 @@ router.get('/check', function(req, res, next) {
         if (err) console.log(err, err.stack); // an error occurred
         if(Object.keys(data).length != 0) {
             console.log(data);
-            res.send({"result": true});
+            var randjc = randomCode();
+            var params2 = {
+                Item: {
+                    JoinCode: {
+                        S: randjc
+                    },
+                    players: {
+                        L: [
+                            {
+                                S: req.query.gcm_id
+                            }
+                        ]
+                    },
+                },
+                TableName: 'CurrentGames',
+            }
+            dynamodb.putItem(params2, function(err, data) {
+                if(err) {
+                    console.log(err);
+                }
+                else {
+                    res.send({
+                        "result": true,
+                        "joinCode": randjc
+                    });
+                }
+            });
         }
         else {
-            res.send({"result": false});
+            res.send({"result": false,
+                     "joinCode": "0000"});
         }
     });
 });
@@ -67,12 +94,24 @@ router.get('/uberauth', function(req, res, next) {
                 else {
                     res.send("success");
                 }
-            }); }
+            });
+        }
     });
 });
 
 router.post('/uber', function(req, res, next) {
     console.log(req.query);
 });
+
+function randomString(length, chars) {
+    var result = '';
+    for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
+    return result;
+}
+var rString = randomString(32, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+
+function randomCode() {
+    return randomString(4, rString);
+}
 
 module.exports = router;
