@@ -15,10 +15,6 @@ var uber = new Uber({
 AWS.config.update({region: 'us-east-1'});
 var dynamodb = new AWS.DynamoDB();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
 
 router.get('/check', function(req, res, next) {
     var params = {
@@ -45,17 +41,11 @@ router.get('/uberauth', function(req, res, next) {
     console.log(req.query.authorization_code);
     uber.authorization({authorization_code: req.query.authorization_code}, function(err, access_token, refresh_token) {
         if(err) {
-            console.error(err);
-            res.send(err);
+            res.status(err.statusCode).send(err);
         }
         else {
             console.log(access_token);
             console.log(refresh_token);
-            res.send({
-                'gcm_id': req.query.gcm_id,
-                'access_token': access_token,
-                'refresh_token': refresh_token
-            });
             var params = {
                 Item: {
                     gcm_id: {
@@ -71,10 +61,18 @@ router.get('/uberauth', function(req, res, next) {
                 TableName: 'Users'
             };
             dynamodb.putItem(params, function(err, data) {
-                if (err) console.log(err, err.stack); // an error occurred
-                else     console.log(data);           // successful response
+                if (err) {
+                    res.status(500).send("something broke");
+                }
+                else {
+                    res.send("success");
+                }
             }); }
     });
+});
+
+router.post('/uber', function(req, res, next) {
+    console.log(req.query);
 });
 
 module.exports = router;
