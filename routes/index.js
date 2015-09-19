@@ -31,12 +31,12 @@ router.get('/check', function(req, res, next) {
     };
     dynamodb.getItem(params, function(err, data) {
         if (err) console.log(err, err.stack); // an error occurred
-        if(data) {
+        if(Object.keys(data).length != 0) {
             console.log(data);
-            res.send("true");
+            res.send({"result": true});
         }
         else {
-            res.send("false");
+            res.send({"result": false});
         }
     });
 });
@@ -56,6 +56,8 @@ router.get('/uberauth', function(req, res, next) {
                 'access_token': access_token,
                 'refresh_token': refresh_token
             });
+            var params = {
+            };
         }
     });
 });
