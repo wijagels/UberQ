@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var aws = require('aws-sdk');
+var AWS = require('aws-sdk');
 var Uber = require('node-uber');
 
 var uber = new Uber({
@@ -12,13 +12,33 @@ var uber = new Uber({
   name: 'ÜberQ'
 });
 
+AWS.config.update({region: 'us-east-1'});
+var dynamodb = new AWS.DynamoDB();
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
 router.get('/check', function(req, res, next) {
-    res.send('hey');
+    var params = {
+        Key: { /* required */
+            gcm_id: { /* AttributeValue */
+                S: req.query.gcm_id
+            }
+        },
+        TableName: 'Users'
+    };
+    dynamodb.getItem(params, function(err, data) {
+        if (err) console.log(err, err.stack); // an error occurred
+        if(data) {
+            console.log(data);
+            res.send("true");
+        }
+        else {
+            res.send("false");
+        }
+    });
 });
 
 router.get('/uberauth', function(req, res, next) {
@@ -32,6 +52,7 @@ router.get('/uberauth', function(req, res, next) {
             console.log(access_token);
             console.log(refresh_token);
             res.send({
+                'gcm_id': req.query.gcm_id,
                 'access_token': access_token,
                 'refresh_token': refresh_token
             });
