@@ -18,15 +18,24 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/check', function(req, res, next) {
-
+    res.send('hey');
 });
 
 router.get('/uberauth', function(req, res, next) {
-    console.log(req.query.rt);
-    uber.authorization({authorization_code: req.query.rt}, function(err, access_token, refresh_token) {
-        if(err) console.error(err);
-        console.log(access_token);
-        console.log(refresh_token);
+    console.log(req.query.authorization_code);
+    uber.authorization({authorization_code: req.query.authorization_code}, function(err, access_token, refresh_token) {
+        if(err) {
+            console.error(err);
+            res.send(err);
+        }
+        else {
+            console.log(access_token);
+            console.log(refresh_token);
+            res.send({
+                'access_token': access_token,
+                'refresh_token': refresh_token
+            });
+        }
     });
 });
 
