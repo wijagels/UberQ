@@ -89,10 +89,10 @@ router.get('/uberauth', function(req, res, next) {
             };
             dynamodb.putItem(params, function(err, data) {
                 if (err) {
-                    res.status(500).send("something broke");
+                    res.status(500).send(err);
                 }
                 else {
-                    res.send("success");
+                    res.send({"message": "success"});
                 }
             });
         }
