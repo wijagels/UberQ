@@ -88,11 +88,46 @@ router.get('/start', function(req, res, next) {
         },
         TableName: 'CurrentGames'
     }
-    console.log('hi');
     dynamodb.getItem(params, function(err, data) {
         if(err) console.log(err);
         else {
-            res.send(data);
+            var params2 = {
+                Key: {
+                    uid: {
+                        S: 'DO05q5YcqKBZBX4h+1OflcSoSekbX0xvgtOce0raOKbkkY8kYm01I7izwbQuqZEpXA5l7qrU3IMwtFmLSyCNxA=='
+                    }
+                },
+                TableName: 'Questions'
+            }
+            dynamodb.getItem(params2, function(err, data2) {
+                if(err) {
+                    console.log(err);
+                    return;
+                }
+                var question = data2.Item;
+                var pls = data.Item.players.L;
+                console.log(question);
+                for(var i in pls) {
+                    console.log(pls[i].M.gcm_id.S);
+                    var message = {
+                        'registration_id': pls[i].M.gcm_id.S,
+                        'data.type': 'gcm_new_question',
+                        'data.question': question.question,
+                        'data.choice1': question.choices.L[1],
+                        'data.choice2': question.choices.L[2],
+                        'data.choice3': question.choices.L[3],
+                        'data.choice4': question.choices.L[4],
+                    }
+                    gcm.send(message, function(err, messageId){
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log("Sent with message ID: ", messageId);
+                        }
+                    });
+                }
+                res.send(data);
+            });
         }
     });
 });
@@ -119,6 +154,7 @@ router.get('/answer', function(req, res, next) {
 });
 
 var answered = {}
+var correct = ""
 
 
 
