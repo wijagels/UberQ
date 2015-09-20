@@ -152,7 +152,7 @@ router.get('/answer', function(req, res, next) {
             return;
         }
         else {
-        var question = questions[2];
+        var question = questions[Math.floor(Math.random()*questions.length)];
             console.log(question.choices[1]);
             var message = {
                 'registration_id': gcm_id,
