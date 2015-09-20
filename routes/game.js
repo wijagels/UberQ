@@ -9,7 +9,9 @@ var dynamodb = new AWS.DynamoDB();
 
 
 router.get('/join', function(req, res, next) {
-    var jc = req.query.joincode;
+    var jc = req.query.joinCode;
+    var venmo = req.query.venmoUser;
+    var gcm_id = req.query.gcm_id;
 
     var params = {
         Key: { /* required */
@@ -39,10 +41,14 @@ router.get('/join', function(req, res, next) {
             dynamodb.updateItem(params2, function(err, data) {
                 if(err) {
                     console.log(err);
-                    res.status(500).send();
+                    res.status(500).send({
+                        'result': false
+                    });
                 }
                 else {
-                    res.send();
+                    res.send({
+                        'result': true
+                    });
                 }
             });
         }
@@ -50,6 +56,10 @@ router.get('/join', function(req, res, next) {
             res.status(404).send();
         }
     });
+});
+
+router.get('/start', function(req, res, next) {
+    var jc = req.query.joinCode;
 });
 
 

@@ -3,18 +3,27 @@ var router = express.Router();
 
 var AWS = require('aws-sdk');
 var Uber = require('node-uber');
+var request = require('request');
 
 var uber = new Uber({
   client_id: process.env.UBER_CID,
   client_secret: process.env.UBER_CS,
   server_token: process.env.UBER_ST,
   redirect_uri: 'http://localhost:3000/oauth',
+  base_url: 'https://sandbox-api.uber.com/', //SANDBOX MODE!!!
   name: 'ÜberQ'
 });
+var default_product = "b8e5c464-5de2-4539-a35a-986d6e58f186" //UberX
+var default_latitude=40.7492643
+var default_longitude=-73.9891284
 
 AWS.config.update({region: 'us-east-1'});
 var dynamodb = new AWS.DynamoDB();
+console.log(uber.defaults.name);
 
+uber.get({'url': 'products', 'params': {'latitude': default_latitude, 'longitude': default_longitude}}, function(err, data) {
+    console.log(data);
+});
 
 router.get('/check', function(req, res, next) {
     var params = {

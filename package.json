@@ -15,6 +15,7 @@
     "jade": "~1.11.0",
     "morgan": "~1.6.1",
     "node-uber": "0.0.6",
+    "request": "^2.62.0",
     "serve-favicon": "~2.3.0"
   }
 }
