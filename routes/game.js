@@ -53,7 +53,9 @@ router.get('/join', function(req, res, next) {
             });
         }
         else {
-            res.status(404).send();
+            res.status(404).send({
+                'result': false
+            });
         }
     });
 });
