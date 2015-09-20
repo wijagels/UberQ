@@ -3,10 +3,13 @@ var router = express.Router();
 
 var AWS = require('aws-sdk');
 var Uber = require('node-uber');
+var GCM = require('gcm').GCM;
+var unmarshalJson = require('dynamodb-marshaler/unmarshalJson').unmarshalItem;
 
 AWS.config.update({region: 'us-east-1'});
 var dynamodb = new AWS.DynamoDB();
 
+var gcm = new GCM(process.env.GCM_KEY);
 
 router.get('/join', function(req, res, next) {
     var jc = req.query.joinCode;
@@ -38,7 +41,7 @@ router.get('/join', function(req, res, next) {
                 },
                 "ReturnValues": "ALL_NEW"
             }
-            dynamodb.updateItem(params2, function(err, data) {
+            dynamodb.updateItem(params2, function(err, data2) {
                 if(err) {
                     console.log(err);
                     res.send({
@@ -46,6 +49,20 @@ router.get('/join', function(req, res, next) {
                     });
                 }
                 else {
+                    console.log(data2.Attributes.players.L);
+                    var message = {
+                        'registration_id': gcm_id,
+                        'collapse_key': 'Dank may mays',
+                        'data.type': 'gcm_join_game',
+                        'data.message': 'dank may mays'
+                    }
+                    gcm.send(message, function(err, messageId){
+                        if (err) {
+                            console.log("Something has gone wrong!");
+                        } else {
+                            console.log("Sent with message ID: ", messageId);
+                        }
+                    });
                     res.send({
                         'result': true
                     });
@@ -62,7 +79,47 @@ router.get('/join', function(req, res, next) {
 
 router.get('/start', function(req, res, next) {
     var jc = req.query.joinCode;
+    var gcm_id = req.query.gcm_id;
+    var params = {
+        Key: {
+            JoinCode: {
+                S: jc
+            }
+        },
+        TableName: 'CurrentGames'
+    }
+    console.log('hi');
+    dynamodb.getItem(params, function(err, data) {
+        if(err) console.log(err);
+        else {
+            res.send(data);
+        }
+    });
 });
+
+router.get('/answer', function(req, res, next) {
+    var jc = req.query.joinCode;
+    var gcm_id = req.query.gcm_id;
+    var params = {
+        Key: {
+            JoinCode: {
+                S: jc
+            }
+        },
+        TableName: 'CurrentGames'
+    }
+    dynamodb.getItem(params, function(err,data) {
+        if(err) {
+            console.log(err);
+        }
+        else {
+            
+        }
+    });
+});
+
+var answered = {}
+
 
 
 module.exports = router;

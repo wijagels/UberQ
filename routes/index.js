@@ -4,6 +4,7 @@ var router = express.Router();
 var AWS = require('aws-sdk');
 var Uber = require('node-uber');
 var request = require('request');
+var GCM = require('gcm').GCM;
 
 var uber = new Uber({
   client_id: process.env.UBER_CID,
@@ -19,10 +20,10 @@ var default_longitude=-73.9891284
 
 AWS.config.update({region: 'us-east-1'});
 var dynamodb = new AWS.DynamoDB();
-console.log(uber.defaults.name);
+
+var gcm = new GCM(process.env.GCM_KEY);
 
 uber.get({'url': 'products', 'params': {'latitude': default_latitude, 'longitude': default_longitude}}, function(err, data) {
-    console.log(data);
 });
 
 router.get('/check', function(req, res, next) {
@@ -47,7 +48,10 @@ router.get('/check', function(req, res, next) {
                     players: {
                         L: [
                             {
-                                S: req.query.gcm_id
+                                M: {
+                                    "gcm_id": {S: req.query.gcm_id},
+                                    "score": {N: "0"}
+                                }
                             }
                         ]
                     },
