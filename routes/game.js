@@ -41,7 +41,7 @@ router.get('/join', function(req, res, next) {
             dynamodb.updateItem(params2, function(err, data) {
                 if(err) {
                     console.log(err);
-                    res.status(500).send({
+                    res.send({
                         'result': false
                     });
                 }
@@ -53,7 +53,7 @@ router.get('/join', function(req, res, next) {
             });
         }
         else {
-            res.status(404).send({
+            res.send({
                 'result': false
             });
         }
